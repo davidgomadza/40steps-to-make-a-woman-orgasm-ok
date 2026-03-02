@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> hands‑free · voice task & size controller </title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+    }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(145deg, #0b0e1a 0%, #1a1f30 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .glass-panel {
+      max-width: 780px;
+      width: 100%;
+      background: rgba(18, 22, 40, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(120, 140, 220, 0.25);
+      border-radius: 2.5rem;
+      padding: 2rem 2rem 2.2rem;
+      box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(170, 200, 255, 0.1) inset;
+      transition: all 0.2s ease;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: 400;
+      letter-spacing: 1px;
+      color: #eef5ff;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.1rem;
+    }
+    h1 span {
+      background: #2a3a6a;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 0.2rem 1rem;
+      border-radius: 40px;
+      color: #bdd3ff;
+      border: 1px solid #3e5290;
+    }
+    .sub {
+      color: #a0b5e0;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px dashed #2f3b62;
+      padding-bottom: 0.8rem;
+    }
+    .mic-bar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .mic-toggle {
+      background: #1f2748;
+      border: none;
+      color: #bbcdf2;
+      font-size: 1.2rem;
+      padding: 0.5rem 1.4rem 0.5rem 1.2rem;
+      border-radius: 3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid #3d4c7c;
+      transition: 0.15s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .mic-toggle.active {
+      background: #2e3f7a;
+      border-color: #7b9cff;
+      color: white;
+      box-shadow: 0 0 12px #3f6aff;
+    }
+    .mic-toggle .led {
+      width: 12px;
+      height: 12px;
+      border-radius: 20px;
+      background: #6f7893;
+      transition: 0.15s;
+    }
+    .mic-toggle.active .led {
+      background: #62ff9e;
+      box-shadow: 0 0 10px #29ff7e;
+    }
+    .last-command {
+      background: #101626;
+      border-radius: 3rem;
+      padding: 0.5rem 1.2rem;
+      color: #b7d0ff;
+      border: 1px solid #2c3960;
+      font-size: 0.9rem;
+      max-width: 280px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .size-module {
+      background: #0f1422e0;
+      border-radius: 2rem;
+      padding: 1.3rem 1.8rem;
+      margin: 1.5rem 0 2rem 0;
+      border: 1px solid #30406a;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.8rem;
+      backdrop-filter: blur(4px);
+    }
+    .size-label {
+      color: #b7c8f0;
+      font-weight: 300;
+      letter-spacing: 1px;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .size-label i {
+      color: #6d8aff;
+      font-style: normal;
+      font-size: 1.2rem;
+    }
+    .size-options {
+      display: flex;
+      gap: 1.2rem;
+      flex: 1;
+      justify-content: center;
+    }
+    .size-dot {
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 4rem;
+      background: #1f284a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: #7e92c7;
+      border: 2px solid #344674;
+      transition: 0.1s;
+      cursor: default;
+      box-shadow: 0 5px 0 #0b0f1c;
+    }
+    .size-dot.active {
+      background: #4a61b0;
+      border-color: #adc4ff;
+      color: white;
+      box-shadow: 0 0 16px #6182ff, 0 5px 0 #1f2c52;
+      transform: scale(1.02);
+    }
+    .task-section {
+      margin-top: 1rem;
+    }
+    .task-header {
+      display: flex;
+      justify-content: space-between;
+      color: #adc3f0;
+      margin-bottom: 0.8rem;
+      font-size: 1.1rem;
+      font-weight: 300;
+      letter-spacing: 0.3px;
+    }
+    .task-grid {
+      list-style: none;
+      background: #0b101e60;
+      border-radius: 2rem;
+      padding: 0.8rem 0.8rem;
+      border: 1px solid #263157;
+    }
+    .task-item {
+      display: flex;
+      align-items: center;
+      padding: 0.7rem 1rem 0.7rem 1rem;
+      border-radius: 3rem;
+      margin: 0.2rem 0;
+      transition: 0.12s;
+      border: 1px solid transparent;
+    }
+    .task-item.current {
+      background: #20294f;
+      border-color: #5672cf;
+      box-shadow: 0 0 0 1px #5f7ee2 inset;
+    }
+    .task-item input[type="checkbox"] {
+      width: 1.3rem;
+      height: 1.3rem;
+      accent-color: #6c8aff;
+      margin-right: 1rem;
+      transform: scale(1.1);
+      filter: drop-shadow(0 2px 4px #00000055);
+      pointer-events: all;
+    }
+    .task-item label {
+      color: #dbe4ff;
+      font-size: 1.05rem;
+      flex: 1;
+      cursor: default;
+      font-weight: 400;
+    }
+    .step-badge {
+      background: #1d2b4b;
+      border-radius: 2rem;
+      padding: 0.2rem 1rem;
+      font-size: 0.85rem;
+      color: #98b0e6;
+      border: 1px solid #354b7c;
+      margin-left: 0.5rem;
+    }
+    .command-hint {
+      background: #0b0f1d;
+      border-radius: 2rem;
+      padding: 1.2rem 1.5rem;
+      margin-top: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid #2a3562;
+    }
+    .hint-text {
+      color: #99afe6;
+      font-size: 0.9rem;
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+    }
+    .hint-text kbd {
+      background: #212b4b;
+      padding: 0.2rem 0.7rem;
+      border-radius: 3rem;
+      color: #ccdcff;
+      border: 1px solid #4c63a5;
+      font-size: 0.85rem;
+    }
+    .say-ok {
+      color: #ffdb9d;
+      background: #332e1f;
+      padding: 0.3rem 1.3rem;
+      border-radius: 3rem;
+      border: 1px solid #a6894a;
+      font-weight: 500;
+    }
+    footer {
+      margin-top: 1.2rem;
+      color: #3e4d78;
+      font-size: 0.8rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div class="glass-panel">
+  <h1>⏺️ hands‑free panel <span>OK system</span></h1>
+  <div class="sub">
+    <div>voice · size · 10 tasks</div>
+    <div class="mic-bar">
+      <button class="mic-toggle" id="micButton">
+        <span class="led"></span>
+        <span id="micText">start mic</span>
+      </button>
+      <div class="last-command" id="lastCommandDisplay">waiting for "ok"…</div>
+    </div>
+  </div>
+
+  <!-- size selector (voice + visual) -->
+  <div class="size-module">
+    <div class="size-label"><i>⚙️</i> current size</div>
+    <div class="size-options">
+      <div class="size-dot" id="sizeSmall">S</div>
+      <div class="size-dot active" id="sizeMedium">M</div>
+      <div class="size-dot" id="sizeLarge">L</div>
+    </div>
+  </div>
+
+  <!-- task list (functions / steps) -->
+  <div class="task-section">
+    <div class="task-header">
+      <span>📋 40‑step inspired (first 10 shown)</span>
+      <span class="step-badge" id="currentStepDisplay">step 1/10</span>
+    </div>
+    <ul class="task-grid" id="taskListContainer">
+      <!-- dynamically injected via js -->
+    </ul>
+  </div>
+
+  <!-- voice hints & ok system -->
+  <div class="command-hint">
+    <div class="hint-text">
+      <span class="say-ok">🎤 say "OK" first</span>
+      <kbd>"size small/medium/large"</kbd>
+      <kbd>"next"</kbd>
+      <kbd>"check step 3"</kbd>
+      <kbd>"previous"</kbd>
+    </div>
+    <div class="hint-text">
+      <kbd>"reset all"</kbd>
+      <kbd>"uncheck step 5"</kbd>
+      <kbd>"focus step 2"</kbd>
+    </div>
+  </div>
+  <footer>voice recognition • always listening when active • say <span style="color:#aac3ff;">OK</span> before command</footer>
+</div>
+
+<script>
+(function() {
+  // ---------- TASKS (functions) ----------
+  const steps = [
+    "Step 1: Relaxation & connect",
+    "Step 2: Deep breathing",
+    "Step 3: Gentle whisper",
+    "Step 4: Light caress",
+    "Step 5: Warm touch",
+    "Step 6: Sensual focus",
+    "Step 7: Kissing slowly",
+    "Step 8: Shoulder massage",
+    "Step 9: Teasing anticipation",
+    "Step 10: Build energy"
+  ];
+
+  // ---------- STATE ----------
+  let currentSize = 'medium';   // 'small', 'medium', 'large'
+  let currentStepIndex = 0;     // 0-based
+  let isListening = false;
+  let recognition = null;
+  let synth = window.speechSynthesis;
+  let lastProcessedCommand = '';  // avoid duplicates
+  let voiceSupported = true;
+
+  // DOM elements
+  const micBtn = document.getElementById('micButton');
+  const micText = document.getElementById('micText');
+  const lastCmdSpan = document.getElementById('lastCommandDisplay');
+  const sizeSmall = document.getElementById('sizeSmall');
+  const sizeMedium = document.getElementById('sizeMedium');
+  const sizeLarge = document.getElementById('sizeLarge');
+  const taskContainer = document.getElementById('taskListContainer');
+  const currentStepSpan = document.getElementById('currentStepDisplay');
+
+  // Build task list dynamically
+  function renderTasks() {
+    taskContainer.innerHTML = '';
+    steps.forEach((text, idx) => {
+      const li = document.createElement('li');
+      li.className = 'task-item' + (idx === currentStepIndex ? ' current' : '');
+      li.dataset.index = idx;
+
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.id = `step_${idx}`;
+      cb.checked = false; // all unchecked initially
+
+      const label = document.createElement('label');
+      label.htmlFor = `step_${idx}`;
+      label.textContent = text;
+
+      li.appendChild(cb);
+      li.appendChild(label);
+      taskContainer.appendChild(li);
+    });
+    updateCurrentHighlight();
+  }
+  renderTasks();
+
+  // Helper: get all task <li> elements
+  function getTaskItems() {
+    return document.querySelectorAll('.task-item');
+  }
+
+  // Update .current class + step indicator
+  function updateCurrentHighlight() {
+    const items = getTaskItems();
+    items.forEach((item, idx) => {
+      if (idx === currentStepIndex) item.classList.add('current');
+      else item.classList.remove('current');
+    });
+    currentStepSpan.innerText = `step ${currentStepIndex+1}/${steps.length}`;
+    // scroll rough into view
+    const activeItem = items[currentStepIndex];
+    if (activeItem) activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  // Set size UI and variable
+  function setSize(size) {
+    if (!['small','medium','large'].includes(size)) return;
+    currentSize = size;
+    // update dots
+    sizeSmall.classList.remove('active');
+    sizeMedium.classList.remove('active');
+    sizeLarge.classList.remove('active');
+    if (size === 'small') sizeSmall.classList.add('active');
+    if (size === 'medium') sizeMedium.classList.add('active');
+    if (size === 'large') sizeLarge.classList.add('active');
+    speak(`Size set to ${size}`);
+  }
+
+  // Check/uncheck step by index (0-based)
+  function setStepChecked(index, checked) {
+    const cb = document.getElementById(`step_${index}`);
+    if (cb) cb.checked = checked;
+  }
+
+  // toggle step checked (true/false) + speak
+  function checkStep(index) {
+    if (index >= 0 && index < steps.length) {
+      setStepChecked(index, true);
+      speak(`Step ${index+1} checked`);
+    }
+  }
+  function uncheckStep(index) {
+    if (index >= 0 && index < steps.length) {
+      setStepChecked(index, false);
+      speak(`Step ${index+1} unchecked`);
+    }
+  }
+
+  // set current step highlight only (no checkbox change)
+  function setCurrentStep(index) {
+    if (index >= 0 && index < steps.length) {
+      currentStepIndex = index;
+      updateCurrentHighlight();
+    }
+  }
+
+  // next step : check current, then move to next
+  function nextStep() {
+    if (currentStepIndex < steps.length) {
+      // check current step (if any)
+      setStepChecked(currentStepIndex, true);
+      if (currentStepIndex + 1 < steps.length) {
+        currentStepIndex++;
+        updateCurrentHighlight();
+        speak(`Step ${currentStepIndex} checked, now on step ${currentStepIndex+1}`);
+      } else {
+        speak('Last step reached');
+      }
+    }
+  }
+
+  function previousStep() {
+    if (currentStepIndex > 0) {
+      currentStepIndex--;
+      updateCurrentHighlight();
+      speak(`Now on step ${currentStepIndex+1}`);
+    } else {
+      speak('Already at first step');
+    }
+  }
+
+  // reset all: uncheck all, set step 0
+  function resetAll() {
+    for (let i = 0; i < steps.length; i++) {
+      setStepChecked(i, false);
+    }
+    currentStepIndex = 0;
+    updateCurrentHighlight();
+    speak('All steps reset');
+  }
+
+  // speak text
+  function speak(text) {
+    if (!synth) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.1;
+    utterance.voice = synth.getVoices().find(v => v.lang.includes('en')) || null;
+    synth.speak(utterance);
+  }
+
+  // ---------- VOICE COMMAND PARSER (requires "ok" or "okay") ----------
+  function processVoiceCommand(transcript) {
+    const lower = transcript.toLowerCase().trim();
+    // store for display
+    lastCmdSpan.innerText = `"${lower}"`;
+
+    // 1) MUST contain ok / okay
+    if (!lower.includes('ok') && !lower.includes('okay')) return;
+
+    // 2) avoid immediate double processing same command
+    if (lower === lastProcessedCommand) return;
+    lastProcessedCommand = lower;
+
+    // 3) SIZE commands (priority if 'size' present)
+    if (lower.includes('size')) {
+      if (lower.includes('small')) setSize('small');
+      else if (lower.includes('medium')) setSize('medium');
+      else if (lower.includes('large')) setSize('large');
+      else speak('Size not recognized');
+      return;
+    }
+
+    // 4) next / previous
+    if (lower.includes('next') && !lower.includes('size')) {
+      nextStep();
+      return;
+    }
+    if (lower.includes('previous') || lower.includes('prev')) {
+      previousStep();
+      return;
+    }
+
+    // 5) reset all
+    if (lower.includes('reset') && lower.includes('all')) {
+      resetAll();
+      return;
+    }
+
+    // 6) check / uncheck / focus step with number
+    const numberMatch = lower.match(/\d+/);
+    if (numberMatch) {
+      let stepNum = parseInt(numberMatch[0], 10);  // 1-based from voice
+      let idx = stepNum - 1;
+      if (idx >= 0 && idx < steps.length) {
+        if (lower.includes('uncheck')) {
+          uncheckStep(idx);
+          setCurrentStep(idx);
+        } 
+        else if (lower.includes('check')) {
+          checkStep(idx);
+          setCurrentStep(idx);
+        }
+        else if (lower.includes('focus') || lower.includes('highlight') || lower.includes('go to')) {
+          setCurrentStep(idx);
+          speak(`Now focusing step ${stepNum}`);
+        }
+        else if (lower.includes('step')) { 
+          // default: if "step 3" alone, check it (like complete) and focus
+          checkStep(idx);
+          setCurrentStep(idx);
+        } else {
+          speak('Command unclear. Say check, uncheck, or focus');
+        }
+      } else {
+        speak(`Step ${stepNum} out of range`);
+      }
+      return;
+    }
+
+    // 7) fallback
+    speak('Command not recognized. Try "ok size large" or "ok next"');
+  }
+
+  // ---------- WEB SPEECH API SETUP ----------
+  try {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) throw new Error('no speech');
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = (event) => {
+      const last = event.results.length - 1;
+      if (last >= 0) {
+        const transcript = event.results[last][0].transcript;
+        processVoiceCommand(transcript);
+      }
+    };
+
+    recognition.onerror = (e) => {
+      console.warn('recognition error', e);
+      if (e.error === 'not-allowed') {
+        isListening = false;
+        micBtn.classList.remove('active');
+        micText.innerText = 'mic blocked';
+        alert('Microphone permission denied');
+      }
+    };
+
+    recognition.onend = () => {
+      if (isListening) {
+        // auto restart if we still want to listen
+        try { recognition.start(); } catch (e) {}
+      }
+    };
+
+  } catch (e) {
+    voiceSupported = false;
+    lastCmdSpan.innerText = 'voice not supported';
+    micBtn.disabled = true;
+    micText.innerText = 'no mic';
+  }
+
+  // toggle listening
+  function toggleListening() {
+    if (!recognition || !voiceSupported) return;
+    if (isListening) {
+      try { recognition.stop(); } catch (e) {}
+      isListening = false;
+      micBtn.classList.remove('active');
+      micText.innerText = 'start mic';
+      lastCmdSpan.innerText = 'mic off';
+    } else {
+      try { 
+        recognition.start(); 
+        isListening = true;
+        micBtn.classList.add('active');
+        micText.innerText = 'listening...';
+        lastCmdSpan.innerText = 'say "OK" ...';
+      } catch (e) {
+        alert('Cannot start microphone. Ensure permission granted.');
+        isListening = false;
+      }
+    }
+  }
+
+  micBtn.addEventListener('click', toggleListening);
+
+  // manual sync for checkbox clicks (keep internal consistent but not needed for highlight)
+  // we allow manual toggle, but no voice feedback from manual click.
+  // but we want to keep current highlight maybe update? not necessary.
+
+  // Initialize size default medium
+  setSize('medium');
+
+  // extra: allow click on size dots to simulate (optional manual)
+  sizeSmall.addEventListener('click', () => setSize('small'));
+  sizeMedium.addEventListener('click', () => setSize('medium'));
+  sizeLarge.addEventListener('click', () => setSize('large'));
+
+  // for better usability, show current step zero-based fine
+})();
+</script>
+</body>
+</html>
